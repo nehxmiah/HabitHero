@@ -1,4 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { useAuth } from './AuthContext';
+import { supabase } from '../../lib/supabase';
 
 export interface Habit {
   id: string;
@@ -14,27 +16,32 @@ export interface Habit {
   targetDuration?: number; // for duration type (in minutes)
   frequency: string[]; // days of week: ['Mon', 'Tue', ...] or ['daily']
   reminders?: string[]; // reminder times
+  created_at?: string;
+  user_id?: string;
 }
 
 export interface HabitCompletion {
-  habitId: string;
+  id?: string;
+  habit_id: string; // Changed from habitId to match DB
   date: string; // YYYY-MM-DD format
   completed: boolean;
   count?: number; // for count-type habits
   duration?: number; // for duration-type habits (in minutes)
   skipped?: boolean; // true if deliberately skipped
+  created_at?: string;
+  user_id?: string;
 }
 
 interface HabitContextType {
   habits: Habit[];
   completions: HabitCompletion[];
-  addHabit: (habit: Omit<Habit, 'id'>) => void;
-  removeHabit: (habitId: string) => void;
-  updateHabit: (habitId: string, updates: Partial<Habit>) => void;
-  toggleCompletion: (habitId: string, date: string) => void;
-  updateCompletionCount: (habitId: string, date: string, count: number) => void;
-  updateCompletionDuration: (habitId: string, date: string, duration: number) => void;
-  skipHabit: (habitId: string, date: string) => void;
+  addHabit: (habit: Omit<Habit, 'id' | 'created_at' | 'user_id'>) => Promise<void>;
+  removeHabit: (habitId: string) => Promise<void>;
+  updateHabit: (habitId: string, updates: Partial<Habit>) => Promise<void>;
+  toggleCompletion: (habitId: string, date: string) => Promise<void>;
+  updateCompletionCount: (habitId: string, date: string, count: number) => Promise<void>;
+  updateCompletionDuration: (habitId: string, date: string, duration: number) => Promise<void>;
+  skipHabit: (habitId: string, date: string) => Promise<void>;
   getCompletionsForDate: (date: string) => HabitCompletion[];
   getCompletionsForHabit: (habitId: string, startDate: string, endDate: string) => HabitCompletion[];
   getSuccessRate: (startDate: string, endDate: string) => number;
@@ -44,122 +51,238 @@ interface HabitContextType {
 
 const HabitContext = createContext<HabitContextType | null>(null);
 
-const SAMPLE_HABITS: Habit[] = [
-  { id: '1', name: 'RELAXATION', category: 'Self-Care & Well-being', color: '#8B7FFF', icon: 'Heart', time: '15:00', type: 'check', goal: 20, frequency: ['daily'] },
-  { id: '2', name: 'READING SCIENTIFIC PAPERS', category: 'Personal Development', color: '#FFEB3B', icon: 'BookOpen', time: '18:00-19:30', type: 'duration', targetDuration: 60, goal: 15, frequency: ['daily'] },
-  { id: '3', name: 'INTERNET EXPLORATION', category: 'Creativity & Hobbies', color: '#FF8A8A', icon: 'Rocket', description: 'If there is enough time between classes', type: 'check', goal: 10, frequency: ['daily'] },
-  { id: '4', name: 'POMODORO SESSIONS', category: 'Productivity & Work', color: '#FF69F5', icon: 'Timer', goal: 20, type: 'count', targetCount: 4, frequency: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] },
-  { id: '5', name: 'Stretch or do yoga', category: 'Health & Fitness', color: '#4ADE80', icon: 'Dumbbell', goal: 5, type: 'check', frequency: ['daily'] },
-  { id: '6', name: 'Walk 10,000 steps', category: 'Health & Fitness', color: '#3B82F6', icon: 'Footprints', goal: 7, type: 'check', frequency: ['daily'] },
-  { id: '7', name: 'Read a book chapter', category: 'Personal Development', color: '#A78BFA', icon: 'Book', goal: 15, type: 'check', frequency: ['daily'] },
-  { id: '8', name: 'Drink water', category: 'Health & Fitness', color: '#06B6D4', icon: 'Droplet', goal: 25, type: 'count', targetCount: 8, frequency: ['daily'] },
-  { id: '9', name: 'Floss', category: 'Health & Fitness', color: '#EF4444', icon: 'Smile', goal: 20, type: 'check', frequency: ['daily'] },
-  { id: '10', name: 'Play a guitar', category: 'Creativity & Hobbies', color: '#10B981', icon: 'Music', goal: 10, type: 'duration', targetDuration: 30, frequency: ['daily'] },
-  { id: '11', name: 'Call grandpa', category: 'Social & Relationships', color: '#06B6D4', icon: 'Phone', goal: 10, type: 'check', frequency: ['Sun', 'Wed'] },
-  { id: '12', name: 'Volunteer', category: 'Social & Relationships', color: '#8B5CF6', icon: 'Heart', goal: 3, type: 'check', frequency: ['Sat'] },
-  { id: '13', name: 'Put $10 to savings', category: 'Personal Development', color: '#F59E0B', icon: 'DollarSign', goal: 10, type: 'check', frequency: ['Mon', 'Fri'] },
-];
-
-// Generate sample completions for the past 3 months
-const generateSampleCompletions = (): HabitCompletion[] => {
-  const completions: HabitCompletion[] = [];
-  const today = new Date();
-  
-  for (let i = 0; i < 90; i++) {
-    const date = new Date(today);
-    date.setDate(date.getDate() - i);
-    const dateStr = date.toISOString().split('T')[0];
-    
-    SAMPLE_HABITS.forEach(habit => {
-      // Random completion with higher probability for some habits
-      const completionRate = habit.goal ? habit.goal / 30 : 0.5;
-      if (Math.random() < completionRate) {
-        completions.push({
-          habitId: habit.id,
-          date: dateStr,
-          completed: true,
-        });
-      }
-    });
-  }
-  
-  return completions;
-};
-
 export function HabitProvider({ children }: { children: React.ReactNode }) {
-  const [habits, setHabits] = useState<Habit[]>(() => {
-    const stored = localStorage.getItem('habits');
-    return stored ? JSON.parse(stored) : SAMPLE_HABITS;
-  });
-  
-  const [completions, setCompletions] = useState<HabitCompletion[]>(() => {
-    const stored = localStorage.getItem('completions');
-    return stored ? JSON.parse(stored) : generateSampleCompletions();
-  });
+  const { user } = useAuth();
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [completions, setCompletions] = useState<HabitCompletion[]>([]);
 
+  // Fetch initial data
   useEffect(() => {
-    localStorage.setItem('habits', JSON.stringify(habits));
-  }, [habits]);
+    if (!user) {
+      setHabits([]);
+      setCompletions([]);
+      return;
+    }
 
-  useEffect(() => {
-    localStorage.setItem('completions', JSON.stringify(completions));
-  }, [completions]);
+    const loadData = async () => {
+      const [{ data: dbHabits }, { data: dbCompletions }] = await Promise.all([
+        supabase.from('habits').select('*').order('created_at', { ascending: true }),
+        supabase.from('habit_completions').select('*').order('date', { ascending: true })
+      ]);
 
-  const addHabit = (habit: Omit<Habit, 'id'>) => {
-    const newHabit = { ...habit, id: Date.now().toString() };
-    setHabits(prev => [...prev, newHabit]);
+      if (dbHabits) setHabits(dbHabits);
+      if (dbCompletions) setCompletions(dbCompletions);
+    };
+
+    loadData();
+  }, [user]);
+
+  const addHabit = async (habit: Omit<Habit, 'id' | 'created_at' | 'user_id'>) => {
+    if (!user) return;
+
+    // We can confidently assert it will return the data with ID
+    const { data, error } = await supabase
+      .from('habits')
+      .insert([{ ...habit, user_id: user.id }])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating habit:', error);
+      throw new Error(error.message);
+    }
+
+    if (data) {
+      setHabits(prev => [...prev, data]);
+    }
   };
 
-  const removeHabit = (habitId: string) => {
+  const removeHabit = async (habitId: string) => {
+    if (!user) return;
+
+    // Optimistic Update
     setHabits(prev => prev.filter(h => h.id !== habitId));
-    setCompletions(prev => prev.filter(c => c.habitId !== habitId));
+    setCompletions(prev => prev.filter(c => c.habit_id !== habitId));
+
+    const { error } = await supabase.from('habits').delete().eq('id', habitId);
+    
+    if (error) {
+      console.error('Error removing habit:', error);
+      // Ideally we would rollback state here if it fails
+    }
   };
 
-  const updateHabit = (habitId: string, updates: Partial<Habit>) => {
+  const updateHabit = async (habitId: string, updates: Partial<Habit>) => {
+    if (!user) return;
+
+    // Optimistic Update
     setHabits(prev => prev.map(h => h.id === habitId ? { ...h, ...updates } : h));
+
+    const { error } = await supabase.from('habits').update(updates).eq('id', habitId);
+
+    if (error) {
+      console.error('Error updating habit:', error);
+    }
   };
 
-  const toggleCompletion = (habitId: string, date: string) => {
-    setCompletions(prev => {
-      const existing = prev.find(c => c.habitId === habitId && c.date === date);
-      if (existing) {
-        return prev.filter(c => !(c.habitId === habitId && c.date === date));
-      } else {
-        return [...prev, { habitId, date, completed: true }];
+  const toggleCompletion = async (habitId: string, date: string) => {
+    if (!user) return;
+
+    const existing = completions.find(c => c.habit_id === habitId && c.date === date);
+
+    if (existing) {
+      // Optimistic delete
+      setCompletions(prev => prev.filter(c => !(c.habit_id === habitId && c.date === date)));
+      
+      const { error } = await supabase
+        .from('habit_completions')
+        .delete()
+        .match({ habit_id: habitId, date });
+        
+      if (error) console.error('Error deleting completion:', error);
+    } else {
+      // Optimistic insert
+      const newCompletion: HabitCompletion = { 
+        habit_id: habitId, 
+        date, 
+        completed: true,
+        user_id: user.id 
+      };
+      
+      setCompletions(prev => [...prev, newCompletion]);
+
+      const { data, error } = await supabase
+        .from('habit_completions')
+        .insert([newCompletion])
+        .select()
+        .single();
+        
+      if (error) {
+        console.error('Error inserting completion:', error);
+        // Fallback or rollback might be needed in a robust system
+      } else if (data) {
+        // Swap with the actual DB item which has a real ID
+        setCompletions(prev => prev.map(c => 
+          c.habit_id === habitId && c.date === date ? data : c
+        ));
       }
-    });
+    }
   };
 
-  const updateCompletionCount = (habitId: string, date: string, count: number) => {
-    setCompletions(prev => prev.map(c => 
-      c.habitId === habitId && c.date === date ? { ...c, count } : c
-    ));
-  };
+  const updateCompletionCount = async (habitId: string, date: string, count: number) => {
+    if (!user) return;
 
-  const updateCompletionDuration = (habitId: string, date: string, duration: number) => {
-    setCompletions(prev => prev.map(c => 
-      c.habitId === habitId && c.date === date ? { ...c, duration } : c
-    ));
-  };
+    const existing = completions.find(c => c.habit_id === habitId && c.date === date);
 
-  const skipHabit = (habitId: string, date: string) => {
-    setCompletions(prev => {
-      const existing = prev.find(c => c.habitId === habitId && c.date === date);
-      if (existing) {
-        return prev.filter(c => !(c.habitId === habitId && c.date === date));
-      } else {
-        return [...prev, { habitId, date, completed: false, skipped: true }];
+    if (existing) {
+      // Optimistic update
+      setCompletions(prev => prev.map(c => 
+        c.habit_id === habitId && c.date === date ? { ...c, count } : c
+      ));
+
+      await supabase
+        .from('habit_completions')
+        .update({ count })
+        .match({ habit_id: habitId, date });
+    } else {
+      // Create new completion with count
+      const newCompletion: HabitCompletion = { 
+        habit_id: habitId, 
+        date, 
+        completed: true, 
+        count,
+        user_id: user.id
+      };
+      setCompletions(prev => [...prev, newCompletion]);
+
+      const { data } = await supabase
+        .from('habit_completions')
+        .insert([newCompletion])
+        .select()
+        .single();
+
+      if (data) {
+        setCompletions(prev => prev.map(c => c.habit_id === habitId && c.date === date ? data : c));
       }
-    });
+    }
   };
 
+  const updateCompletionDuration = async (habitId: string, date: string, duration: number) => {
+    if (!user) return;
+
+    const existing = completions.find(c => c.habit_id === habitId && c.date === date);
+
+    if (existing) {
+      // Optimistic update
+      setCompletions(prev => prev.map(c => 
+        c.habit_id === habitId && c.date === date ? { ...c, duration } : c
+      ));
+
+      await supabase
+        .from('habit_completions')
+        .update({ duration })
+        .match({ habit_id: habitId, date });
+    } else {
+      const newCompletion: HabitCompletion = { 
+        habit_id: habitId, 
+        date, 
+        completed: true, 
+        duration,
+        user_id: user.id
+      };
+      setCompletions(prev => [...prev, newCompletion]);
+
+      const { data } = await supabase
+        .from('habit_completions')
+        .insert([newCompletion])
+        .select()
+        .single();
+
+      if (data) {
+        setCompletions(prev => prev.map(c => c.habit_id === habitId && c.date === date ? data : c));
+      }
+    }
+  };
+
+  const skipHabit = async (habitId: string, date: string) => {
+    if (!user) return;
+
+    const existing = completions.find(c => c.habit_id === habitId && c.date === date);
+
+    if (existing) {
+      // Optimistic delete
+      setCompletions(prev => prev.filter(c => !(c.habit_id === habitId && c.date === date)));
+      await supabase.from('habit_completions').delete().match({ habit_id: habitId, date });
+    } else {
+      const newCompletion: HabitCompletion = { 
+        habit_id: habitId, 
+        date, 
+        completed: false, 
+        skipped: true,
+        user_id: user.id
+      };
+      setCompletions(prev => [...prev, newCompletion]);
+
+      const { data } = await supabase
+        .from('habit_completions')
+        .insert([newCompletion])
+        .select()
+        .single();
+
+      if (data) {
+        setCompletions(prev => prev.map(c => c.habit_id === habitId && c.date === date ? data : c));
+      }
+    }
+  };
+
+  // Helper getters
   const getCompletionsForDate = (date: string) => {
     return completions.filter(c => c.date === date);
   };
 
   const getCompletionsForHabit = (habitId: string, startDate: string, endDate: string) => {
     return completions.filter(c => 
-      c.habitId === habitId && 
+      c.habit_id === habitId && 
       c.date >= startDate && 
       c.date <= endDate
     );
@@ -170,9 +293,11 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     const end = new Date(endDate);
     const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     
+    if (habits.length === 0) return 0;
+    
     const totalPossible = habits.length * days;
     const totalCompleted = completions.filter(c => 
-      c.date >= startDate && c.date <= endDate
+      c.date >= startDate && c.date <= endDate && c.completed
     ).length;
     
     return totalPossible > 0 ? Math.round((totalCompleted / totalPossible) * 100) : 0;
@@ -185,9 +310,9 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
     
     while (true) {
       const dateStr = date.toISOString().split('T')[0];
-      const completion = completions.find(c => c.habitId === habitId && c.date === dateStr);
+      const completion = completions.find(c => c.habit_id === habitId && c.date === dateStr);
       
-      if (completion && completion.completed) {
+      if (completion?.completed) {
         streak++;
       } else {
         break;
@@ -202,19 +327,21 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
   const getLongestStreak = (habitId: string) => {
     let longestStreak = 0;
     let currentStreak = 0;
-    const habitCompletions = completions.filter(c => c.habitId === habitId);
+    
+    // Sort completions by date ascending
+    const habitCompletions = completions
+      .filter(c => c.habit_id === habitId && c.completed)
+      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
     for (let i = 0; i < habitCompletions.length; i++) {
       const current = habitCompletions[i];
       const next = habitCompletions[i + 1];
       
-      if (current.completed) {
-        currentStreak++;
+      currentStreak++;
         
-        if (!next || new Date(next.date).getTime() - new Date(current.date).getTime() > 24 * 60 * 60 * 1000) {
-          longestStreak = Math.max(longestStreak, currentStreak);
-          currentStreak = 0;
-        }
+      if (!next || new Date(next.date).getTime() - new Date(current.date).getTime() > 24 * 60 * 60 * 1000) {
+        longestStreak = Math.max(longestStreak, currentStreak);
+        currentStreak = 0;
       }
     }
     

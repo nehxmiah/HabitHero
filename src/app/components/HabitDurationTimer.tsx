@@ -57,8 +57,8 @@ export function HabitDurationTimer({ target, current, color, onUpdate }: HabitDu
       
       <div className="flex-1 min-w-[140px]">
         <div className="flex items-center justify-between text-sm mb-1">
-          <span className="font-bold text-black font-mono">{formatTime(elapsed)}</span>
-          <span className="text-xs text-black opacity-75">{target} min goal</span>
+          <span className="font-bold text-[var(--hh-btn-text)] font-mono">{formatTime(elapsed)}</span>
+          <span className="text-xs text-[var(--hh-btn-text)] opacity-75">{target} min goal</span>
         </div>
         <div className="bg-black bg-opacity-20 rounded-full h-2 overflow-hidden">
           <div
@@ -68,7 +68,7 @@ export function HabitDurationTimer({ target, current, color, onUpdate }: HabitDu
         </div>
       </div>
 
-      <div className="text-xs text-black opacity-75 w-12 text-right">
+      <div className="text-xs text-[var(--hh-btn-text)] opacity-75 w-12 text-right">
         {Math.round(progress)}%
       </div>
     </div>

@@ -44,7 +44,7 @@ export function AnalyticsView() {
 
   // Habit performance data
   const habitPerformance = habits.map(habit => {
-    const habitCompletions = rangeCompletions.filter(c => c.habitId === habit.id).length;
+    const habitCompletions = rangeCompletions.filter(c => c.habit_id === habit.id).length;
     const rate = totalDays > 0 ? Math.round((habitCompletions / totalDays) * 100) : 0;
     return {
       name: habit.name,
@@ -72,7 +72,7 @@ export function AnalyticsView() {
   const categoryData = categories.map(category => {
     const categoryHabits = habits.filter(h => h.category === category);
     const categoryCompletions = rangeCompletions.filter(c => 
-      categoryHabits.some(h => h.id === c.habitId)
+      categoryHabits.some(h => h.id === c.habit_id)
     ).length;
     
     return {
@@ -94,7 +94,7 @@ export function AnalyticsView() {
       date.setDate(today.getDate() - i);
       const dateStr = formatDate(date);
       
-      if (completions.some(c => c.habitId === habit.id && c.date === dateStr)) {
+      if (completions.some(c => c.habit_id === habit.id && c.date === dateStr)) {
         currentStreak++;
         maxStreak = Math.max(maxStreak, currentStreak);
       } else {
@@ -115,12 +115,12 @@ export function AnalyticsView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h2 className="text-4xl font-bold text-[#4ADE80]">Analytics Dashboard</h2>
+        <h2 className="text-4xl font-bold text-[var(--hh-accent)]">Analytics Dashboard</h2>
         <div className="flex gap-2">
           <button
             onClick={() => setTimeRange('week')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              timeRange === 'week' ? 'bg-[#4ADE80] text-black' : 'bg-gray-800 hover:bg-gray-700'
+              timeRange === 'week' ? 'bg-[var(--hh-btn)] text-[var(--hh-btn-text)]' : 'bg-[var(--hh-border)] hover:bg-[var(--hh-muted)]'
             }`}
           >
             Week
@@ -128,7 +128,7 @@ export function AnalyticsView() {
           <button
             onClick={() => setTimeRange('month')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              timeRange === 'month' ? 'bg-[#4ADE80] text-black' : 'bg-gray-800 hover:bg-gray-700'
+              timeRange === 'month' ? 'bg-[var(--hh-btn)] text-[var(--hh-btn-text)]' : 'bg-[var(--hh-border)] hover:bg-[var(--hh-muted)]'
             }`}
           >
             Month
@@ -136,7 +136,7 @@ export function AnalyticsView() {
           <button
             onClick={() => setTimeRange('year')}
             className={`px-4 py-2 rounded-lg text-sm transition-colors ${
-              timeRange === 'year' ? 'bg-[#4ADE80] text-black' : 'bg-gray-800 hover:bg-gray-700'
+              timeRange === 'year' ? 'bg-[var(--hh-btn)] text-[var(--hh-btn-text)]' : 'bg-[var(--hh-border)] hover:bg-[var(--hh-muted)]'
             }`}
           >
             Year
@@ -146,44 +146,44 @@ export function AnalyticsView() {
 
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Success Rate</span>
-            <TrendingUp className="w-5 h-5 text-[#4ADE80]" />
+            <span className="text-sm text-[var(--hh-muted)]">Success Rate</span>
+            <TrendingUp className="w-5 h-5 text-[var(--hh-accent)]" />
           </div>
-          <div className="text-4xl font-bold text-[#4ADE80]">{successRate}%</div>
+          <div className="text-4xl font-bold text-[var(--hh-accent)]">{successRate}%</div>
         </div>
 
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Total Completions</span>
+            <span className="text-sm text-[var(--hh-muted)]">Total Completions</span>
             <Calendar className="w-5 h-5 text-[#3B82F6]" />
           </div>
           <div className="text-4xl font-bold">{rangeCompletions.length}</div>
         </div>
 
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Avg Per Day</span>
+            <span className="text-sm text-[var(--hh-muted)]">Avg Per Day</span>
             <TrendingUp className="w-5 h-5 text-[#A78BFA]" />
           </div>
           <div className="text-4xl font-bold">{averagePerDay}</div>
         </div>
 
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-gray-400">Best Streak</span>
+            <span className="text-sm text-[var(--hh-muted)]">Best Streak</span>
             <Award className="w-5 h-5 text-[#FBBF24]" />
           </div>
           <div className="text-4xl font-bold text-[#FBBF24]">{topStreak?.streak || 0}</div>
-          <div className="text-xs text-gray-400 mt-1 truncate">{topStreak?.habit}</div>
+          <div className="text-xs text-[var(--hh-muted)] mt-1 truncate">{topStreak?.habit}</div>
         </div>
       </div>
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Trend */}
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <h3 className="text-lg font-bold mb-4">Daily Completion Trend</h3>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={dailyTrend}>
@@ -206,7 +206,7 @@ export function AnalyticsView() {
         </div>
 
         {/* Category Distribution */}
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <h3 className="text-lg font-bold mb-4">Category Distribution</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -233,7 +233,7 @@ export function AnalyticsView() {
       </div>
 
       {/* Habit Performance */}
-      <div className="bg-[#0a0a0a] rounded-lg p-6">
+      <div className="bg-[var(--hh-card)] rounded-lg p-6">
         <h3 className="text-lg font-bold mb-4">Habit Performance</h3>
         <ResponsiveContainer width="100%" height={400}>
           <BarChart data={habitPerformance}>
@@ -253,9 +253,9 @@ export function AnalyticsView() {
       {/* Top Performers */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Best Habits */}
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-            <TrendingUp className="w-5 h-5 text-[#4ADE80]" />
+            <TrendingUp className="w-5 h-5 text-[var(--hh-accent)]" />
             Top Performing Habits
           </h3>
           <div className="space-y-3">
@@ -265,9 +265,9 @@ export function AnalyticsView() {
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-1">
                     <span className="text-sm font-medium">{habit.name}</span>
-                    <span className="text-sm text-gray-400">{habit.completions} times</span>
+                    <span className="text-sm text-[var(--hh-muted)]">{habit.completions} times</span>
                   </div>
-                  <div className="bg-gray-800 rounded-full h-2 overflow-hidden">
+                  <div className="bg-[var(--hh-border)] rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{ width: `${habit.rate}%`, backgroundColor: habit.color }}
@@ -280,7 +280,7 @@ export function AnalyticsView() {
         </div>
 
         {/* Longest Streaks */}
-        <div className="bg-[#0a0a0a] rounded-lg p-6">
+        <div className="bg-[var(--hh-card)] rounded-lg p-6">
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Award className="w-5 h-5 text-[#FBBF24]" />
             Longest Streaks
@@ -294,7 +294,7 @@ export function AnalyticsView() {
                     <span className="text-sm font-medium">{item.habit}</span>
                     <span className="text-sm font-bold text-[#FBBF24]">{item.streak} days</span>
                   </div>
-                  <div className="bg-gray-800 rounded-full h-2 overflow-hidden">
+                  <div className="bg-[var(--hh-border)] rounded-full h-2 overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
                       style={{ width: `${Math.min((item.streak / 30) * 100, 100)}%`, backgroundColor: item.color }}

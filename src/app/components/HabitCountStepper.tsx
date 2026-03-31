@@ -23,8 +23,8 @@ export function HabitCountStepper({ current, target, color, onIncrement, onDecre
       
       <div className="flex-1 min-w-[120px]">
         <div className="flex items-center justify-between text-sm mb-1">
-          <span className="font-bold text-black">{current}/{target}</span>
-          <span className="text-xs text-black opacity-75">{Math.round(progress)}%</span>
+          <span className="font-bold text-[var(--hh-btn-text)]">{current}/{target}</span>
+          <span className="text-xs text-[var(--hh-btn-text)] opacity-75">{Math.round(progress)}%</span>
         </div>
         <div className="bg-black bg-opacity-20 rounded-full h-2 overflow-hidden">
           <div

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useHabits } from '../context/HabitContext';
+import { useTheme } from '../context/ThemeContext';
 import { useLocation, useNavigate } from 'react-router';
 import { Calendar, ChevronLeft, ChevronRight, Filter, Plus, TrendingUp, CheckCircle2, X } from 'lucide-react';
 import { Button } from './ui/button';
@@ -17,6 +18,7 @@ const CATEGORIES = [
 
 export function Sidebar({ onClose }: { onClose: () => void }) {
   const { habits, completions, addHabit } = useHabits();
+  const { theme, setTheme, themes } = useTheme();
   const location = useLocation();
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(new Date());
@@ -87,12 +89,12 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
   const totalHabits = habits.length;
 
   return (
-    <div className="w-80 bg-[#0a0a0a] border-r border-gray-800 flex flex-col h-screen overflow-hidden">
+    <div className="w-80 bg-[var(--hh-card)] border-r border-[var(--hh-border)] flex flex-col h-screen overflow-hidden">
       {/* Sidebar Header */}
-      <div className="p-4 border-b border-gray-800">
+      <div className="p-4 border-b border-[var(--hh-border)]">
         <Button
           onClick={() => setShowAddHabit(true)}
-          className="w-full bg-[#4ADE80] hover:bg-[#3DC970] text-black"
+          className="w-full bg-[var(--hh-btn)] hover:opacity-90 text-[var(--hh-btn-text)]"
         >
           <Plus className="w-4 h-4 mr-2" />
           Create Habit
@@ -101,19 +103,19 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
 
       <div className="flex-1 overflow-y-auto">
         {/* Mini Calendar */}
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-4 border-b border-[var(--hh-border)]">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-semibold">{selectedDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</h3>
             <div className="flex gap-1">
               <button
                 onClick={() => navigateMonth(-1)}
-                className="p-1 hover:bg-gray-800 rounded"
+                className="p-1 hover:bg-[var(--hh-border)] rounded"
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
               <button
                 onClick={() => navigateMonth(1)}
-                className="p-1 hover:bg-gray-800 rounded"
+                className="p-1 hover:bg-[var(--hh-border)] rounded"
               >
                 <ChevronRight className="w-4 h-4" />
               </button>
@@ -122,7 +124,7 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
 
           <div className="grid grid-cols-7 gap-1">
             {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-              <div key={idx} className="text-xs text-center text-gray-500 font-medium h-6 flex items-center justify-center">
+              <div key={idx} className="text-xs text-center text-[var(--hh-muted)] font-medium h-6 flex items-center justify-center">
                 {day}
               </div>
             ))}
@@ -147,14 +149,14 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
                     }
                   }}
                   className={`aspect-square rounded flex items-center justify-center text-xs relative ${
-                    isSelected ? 'bg-[#4ADE80] text-black font-bold' :
-                    isToday ? 'bg-gray-700 text-white font-bold' :
-                    'hover:bg-gray-800'
+                    isSelected ? 'bg-[var(--hh-btn)] text-[var(--hh-btn-text)] font-bold' :
+                    isToday ? 'bg-[var(--hh-muted)] text-[var(--hh-text)] font-bold' :
+                    'hover:bg-[var(--hh-border)]'
                   }`}
                 >
                   {day.getDate()}
                   {hasActivity && !isSelected && (
-                    <div className="absolute bottom-0.5 w-1 h-1 bg-[#4ADE80] rounded-full" />
+                    <div className="absolute bottom-0.5 w-1 h-1 bg-[var(--hh-btn)] rounded-full" />
                   )}
                 </button>
               );
@@ -163,33 +165,33 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Quick Stats */}
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-4 border-b border-[var(--hh-border)]">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-[#4ADE80]" />
+            <TrendingUp className="w-4 h-4 text-[var(--hh-accent)]" />
             Quick Stats
           </h3>
           <div className="space-y-2">
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">Today</span>
-              <span className="text-sm font-bold text-[#4ADE80]">{todayCompletions}/{totalHabits}</span>
+              <span className="text-xs text-[var(--hh-muted)]">Today</span>
+              <span className="text-sm font-bold text-[var(--hh-accent)]">{todayCompletions}/{totalHabits}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">This Week</span>
+              <span className="text-xs text-[var(--hh-muted)]">This Week</span>
               <span className="text-sm font-bold">{weekCompletions}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">This Month</span>
+              <span className="text-xs text-[var(--hh-muted)]">This Month</span>
               <span className="text-sm font-bold">{monthCompletions}</span>
             </div>
             <div className="flex justify-between items-center">
-              <span className="text-xs text-gray-400">Total Habits</span>
+              <span className="text-xs text-[var(--hh-muted)]">Total Habits</span>
               <span className="text-sm font-bold">{totalHabits}</span>
             </div>
           </div>
         </div>
 
         {/* Categories Filter */}
-        <div className="p-4 border-b border-gray-800">
+        <div className="p-4 border-b border-[var(--hh-border)]">
           <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
             <Filter className="w-4 h-4" />
             Categories
@@ -204,7 +206,7 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
                   key={cat.name}
                   onClick={() => toggleCategory(cat.name)}
                   className={`w-full flex items-center justify-between p-2 rounded-lg transition-colors ${
-                    isSelected ? 'bg-gray-800' : 'hover:bg-gray-800'
+                    isSelected ? 'bg-[var(--hh-border)]' : 'hover:bg-[var(--hh-border)]'
                   }`}
                 >
                   <div className="flex items-center gap-2">
@@ -214,7 +216,7 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
                     />
                     <span className="text-xs">{cat.name.split(' & ')[0]}</span>
                   </div>
-                  <span className="text-xs text-gray-400">{categoryHabits}</span>
+                  <span className="text-xs text-[var(--hh-muted)]">{categoryHabits}</span>
                 </button>
               );
             })}
@@ -222,7 +224,7 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
           {selectedCategories.length > 0 && (
             <button
               onClick={() => setSelectedCategories([])}
-              className="w-full mt-2 text-xs text-gray-400 hover:text-white"
+              className="w-full mt-2 text-xs text-[var(--hh-muted)] hover:text-[var(--hh-text)]"
             >
               Clear filters
             </button>
@@ -239,14 +241,14 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
             {habits.map(habit => (
               <div
                 key={habit.id}
-                className="flex items-center gap-2 p-2 rounded hover:bg-gray-800 text-xs"
+                className="flex items-center gap-2 p-2 rounded hover:bg-[var(--hh-border)] text-xs"
               >
                 <div
                   className="w-2 h-2 rounded-full"
                   style={{ backgroundColor: habit.color }}
                 />
                 <span className="flex-1 truncate">{habit.name}</span>
-                <span className="text-gray-500">{habit.goal || '-'}</span>
+                <span className="text-[var(--hh-muted)]">{habit.goal || '-'}</span>
               </div>
             ))}
           </div>
@@ -268,7 +270,7 @@ export function Sidebar({ onClose }: { onClose: () => void }) {
 function AddHabitDialog({ isOpen, onClose, onAdd }: {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (habit: any) => void;
+  onAdd: (habit: any) => Promise<void>;
 }) {
   const [formData, setFormData] = useState({
     name: '',
@@ -280,37 +282,49 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
     targetDuration: 30,
     frequency: ['daily'] as string[],
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const category = CATEGORIES.find(c => c.name === formData.category);
-    onAdd({
-      ...formData,
-      color: category?.color || '#4ADE80',
-      targetCount: formData.type === 'count' ? formData.targetCount : undefined,
-      targetDuration: formData.type === 'duration' ? formData.targetDuration : undefined,
-    });
-    setFormData({ 
-      name: '', 
-      category: CATEGORIES[0].name, 
-      goal: 20, 
-      icon: 'Circle',
-      type: 'check',
-      targetCount: 8,
-      targetDuration: 30,
-      frequency: ['daily'],
-    });
-    onClose();
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const category = CATEGORIES.find(c => c.name === formData.category);
+      await onAdd({
+        ...formData,
+        color: category?.color || '#4ADE80',
+        targetCount: formData.type === 'count' ? formData.targetCount : undefined,
+        targetDuration: formData.type === 'duration' ? formData.targetDuration : undefined,
+      });
+      // Only close the dialog if the insert succeeded
+      setFormData({ 
+        name: '', 
+        category: CATEGORIES[0].name, 
+        goal: 20, 
+        icon: 'Circle',
+        type: 'check',
+        targetCount: 8,
+        targetDuration: 30,
+        frequency: ['daily'],
+      });
+      onClose();
+    } catch (err: any) {
+      setError(err?.message ?? 'Failed to create habit. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-[#1a1a1a] rounded-lg p-6 w-full max-w-md border border-gray-800 max-h-[90vh] overflow-y-auto">
+      <div className="bg-[var(--hh-bg)] rounded-lg p-6 w-full max-w-md border border-[var(--hh-border)] max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-bold">Create New Habit</h2>
-          <button onClick={onClose} className="p-2 hover:bg-gray-800 rounded">
+          <button onClick={onClose} className="p-2 hover:bg-[var(--hh-border)] rounded">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -324,7 +338,7 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               placeholder="e.g., Morning meditation"
               required
-              className="bg-[#0a0a0a] border-gray-700"
+              className="bg-[var(--hh-card)] border-[var(--hh-border)]"
             />
           </div>
 
@@ -334,7 +348,7 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
               id="type"
               value={formData.type}
               onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
-              className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-700 rounded-lg text-sm"
+              className="w-full px-3 py-2 bg-[var(--hh-card)] border border-[var(--hh-border)] rounded-lg text-sm"
             >
               <option value="check">Check-in (Simple completion)</option>
               <option value="count">Count (Track number, e.g., 8 glasses)</option>
@@ -352,7 +366,7 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
                 onChange={(e) => setFormData({ ...formData, targetCount: parseInt(e.target.value) })}
                 min="1"
                 max="100"
-                className="bg-[#0a0a0a] border-gray-700"
+                className="bg-[var(--hh-card)] border-[var(--hh-border)]"
               />
             </div>
           )}
@@ -367,7 +381,7 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
                 onChange={(e) => setFormData({ ...formData, targetDuration: parseInt(e.target.value) })}
                 min="1"
                 max="240"
-                className="bg-[#0a0a0a] border-gray-700"
+                className="bg-[var(--hh-card)] border-[var(--hh-border)]"
               />
             </div>
           )}
@@ -378,7 +392,7 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
               id="category"
               value={formData.category}
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-              className="w-full px-3 py-2 bg-[#0a0a0a] border border-gray-700 rounded-lg text-sm"
+              className="w-full px-3 py-2 bg-[var(--hh-card)] border border-[var(--hh-border)] rounded-lg text-sm"
             >
               {CATEGORIES.map(cat => (
                 <option key={cat.name} value={cat.name}>{cat.name}</option>
@@ -395,16 +409,20 @@ function AddHabitDialog({ isOpen, onClose, onAdd }: {
               onChange={(e) => setFormData({ ...formData, goal: parseInt(e.target.value) })}
               min="1"
               max="31"
-              className="bg-[#0a0a0a] border-gray-700"
+              className="bg-[var(--hh-card)] border-[var(--hh-border)]"
             />
           </div>
 
+          {error && (
+            <p className="text-sm text-red-400 bg-red-900/20 border border-red-800 rounded-lg px-3 py-2">{error}</p>
+          )}
+
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
               Cancel
             </Button>
-            <Button type="submit" className="bg-[#4ADE80] hover:bg-[#3DC970] text-black">
-              Create Habit
+            <Button type="submit" className="bg-[var(--hh-btn)] hover:opacity-90 text-[var(--hh-btn-text)]" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create Habit'}
             </Button>
           </div>
         </form>

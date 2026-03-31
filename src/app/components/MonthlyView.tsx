@@ -26,7 +26,7 @@ export function MonthlyView() {
 
   const isCompleted = (habitId: string, date: Date) => {
     const dateStr = formatDate(date);
-    return completions.some(c => c.habitId === habitId && c.date === dateStr);
+    return completions.some(c => c.habit_id === habitId && c.date === dateStr);
   };
 
   const navigateMonth = (delta: number) => {
@@ -61,7 +61,7 @@ export function MonthlyView() {
   // Calculate progress for each habit
   const habitProgress = habits.map(habit => {
     const completed = completions.filter(c => 
-      c.habitId === habit.id && 
+      c.habit_id === habit.id && 
       c.date >= formatDate(firstDay) && 
       c.date <= formatDate(lastDay)
     ).length;
@@ -76,27 +76,27 @@ export function MonthlyView() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => navigateMonth(-1)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--hh-border)] rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h2 className="text-4xl font-bold text-[#4ADE80]">{monthStr}</h2>
+          <h2 className="text-4xl font-bold text-[var(--hh-accent)]">{monthStr}</h2>
           <button
             onClick={() => navigateMonth(1)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--hh-border)] rounded-lg transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
         <div className="text-right">
-          <div className="text-5xl font-bold text-[#4ADE80]">{successRate}%</div>
-          <div className="text-sm text-gray-400">Success Rate</div>
+          <div className="text-5xl font-bold text-[var(--hh-accent)]">{successRate}%</div>
+          <div className="text-sm text-[var(--hh-muted)]">Success Rate</div>
         </div>
       </div>
 
       {/* Chart */}
-      <div className="bg-[#0a0a0a] rounded-lg p-6">
+      <div className="bg-[var(--hh-card)] rounded-lg p-6">
         <h3 className="text-sm font-semibold mb-4">Daily Completions</h3>
         <ResponsiveContainer width="100%" height={200}>
           <LineChart data={chartData}>
@@ -119,26 +119,26 @@ export function MonthlyView() {
       </div>
 
       {/* Habit Grid */}
-      <div className="bg-[#0a0a0a] rounded-lg overflow-hidden">
+      <div className="bg-[var(--hh-card)] rounded-lg overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-800">
-                <th className="px-4 py-3 text-left text-sm font-medium text-gray-400 sticky left-0 bg-[#0a0a0a] z-10">HABIT</th>
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-400">GOAL</th>
+              <tr className="border-b border-[var(--hh-border)]">
+                <th className="px-4 py-3 text-left text-sm font-medium text-[var(--hh-muted)] sticky left-0 bg-[var(--hh-card)] z-10">HABIT</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-[var(--hh-muted)]">GOAL</th>
                 {days.map((day, idx) => (
                   <th key={idx} className="px-2 py-3 text-center text-xs font-medium">
-                    <div className="text-gray-400">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</div>
-                    <div className="text-white">{day.getDate()}</div>
+                    <div className="text-[var(--hh-muted)]">{day.toLocaleDateString('en-US', { weekday: 'short' }).charAt(0)}</div>
+                    <div className="text-[var(--hh-text)]">{day.getDate()}</div>
                   </th>
                 ))}
-                <th className="px-4 py-3 text-center text-sm font-medium text-gray-400">PROGRESS</th>
+                <th className="px-4 py-3 text-center text-sm font-medium text-[var(--hh-muted)]">PROGRESS</th>
               </tr>
             </thead>
             <tbody>
               {habitProgress.map(({ habit, completed, progress }) => (
-                <tr key={habit.id} className="border-b border-gray-800 hover:bg-gray-900">
-                  <td className="px-4 py-3 sticky left-0 bg-[#0a0a0a] z-10">
+                <tr key={habit.id} className="border-b border-[var(--hh-border)] hover:bg-gray-900">
+                  <td className="px-4 py-3 sticky left-0 bg-[var(--hh-card)] z-10">
                     <div className="text-sm font-medium">{habit.name}</div>
                   </td>
                   <td className="px-4 py-3 text-center text-sm">{habit.goal || days.length}</td>
@@ -148,7 +148,7 @@ export function MonthlyView() {
                       <td key={idx} className="px-2 py-3 text-center">
                         {done && (
                           <div
-                            className="w-6 h-6 mx-auto rounded flex items-center justify-center text-xs font-bold text-white"
+                            className="w-6 h-6 mx-auto rounded flex items-center justify-center text-xs font-bold text-[var(--hh-text)]"
                             style={{ backgroundColor: habit.color }}
                           >
                             ✓
@@ -159,15 +159,15 @@ export function MonthlyView() {
                   })}
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-gray-800 rounded-full h-6 overflow-hidden">
+                      <div className="flex-1 bg-[var(--hh-border)] rounded-full h-6 overflow-hidden">
                         <div
-                          className="h-full rounded-full flex items-center justify-center text-xs font-bold text-white transition-all"
+                          className="h-full rounded-full flex items-center justify-center text-xs font-bold text-[var(--hh-text)] transition-all"
                           style={{ width: `${progress}%`, backgroundColor: habit.color }}
                         >
                           {progress > 20 && `${progress}%`}
                         </div>
                       </div>
-                      {progress <= 20 && <span className="text-xs text-gray-400 w-10">{progress}%</span>}
+                      {progress <= 20 && <span className="text-xs text-[var(--hh-muted)] w-10">{progress}%</span>}
                     </div>
                   </td>
                 </tr>

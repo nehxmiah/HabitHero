@@ -24,7 +24,7 @@ export function DailyView() {
 
   const isCompleted = (habitId: string, date: Date) => {
     const dateStr = formatDate(date);
-    return completions.some(c => c.habitId === habitId && c.date === dateStr);
+    return completions.some(c => c.habit_id === habitId && c.date === dateStr);
   };
 
   const handleToggle = (habitId: string, date: Date) => {
@@ -44,26 +44,26 @@ export function DailyView() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-4xl font-bold text-[#4ADE80]">TODAY'S HABITS</h2>
-          <p className="text-gray-400 mt-2">
+          <h2 className="text-4xl font-bold text-[var(--hh-accent)]">TODAY'S HABITS</h2>
+          <p className="text-[var(--hh-muted)] mt-2">
             {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
           </p>
         </div>
         <div className="text-right">
-          <div className="text-5xl font-bold text-[#4ADE80]">{completedToday}/{todayHabits.length}</div>
-          <div className="text-sm text-gray-400">Completed</div>
+          <div className="text-5xl font-bold text-[var(--hh-accent)]">{completedToday}/{todayHabits.length}</div>
+          <div className="text-sm text-[var(--hh-muted)]">Completed</div>
         </div>
       </div>
 
       {/* Progress Bar */}
-      <div className="bg-[#0a0a0a] rounded-lg p-4">
+      <div className="bg-[var(--hh-card)] rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm text-gray-400">Daily Progress</span>
+          <span className="text-sm text-[var(--hh-muted)]">Daily Progress</span>
           <span className="text-sm font-bold">{Math.round((completedToday / todayHabits.length) * 100)}%</span>
         </div>
-        <div className="bg-gray-800 rounded-full h-3 overflow-hidden">
+        <div className="bg-[var(--hh-border)] rounded-full h-3 overflow-hidden">
           <div
-            className="h-full bg-[#4ADE80] rounded-full transition-all duration-500"
+            className="h-full bg-[var(--hh-btn)] rounded-full transition-all duration-500"
             style={{ width: `${(completedToday / todayHabits.length) * 100}%` }}
           />
         </div>
@@ -77,12 +77,12 @@ export function DailyView() {
 
           return (
             <div key={category.name}>
-              <h3 className="text-xs text-gray-400 mb-2 uppercase tracking-wider">{category.name}</h3>
+              <h3 className="text-xs text-[var(--hh-muted)] mb-2 uppercase tracking-wider">{category.name}</h3>
               <div className="space-y-2">
                 {categoryHabits.map(habit => {
                   const completed = isCompleted(habit.id, selectedDate);
                   const IconComponent = (LucideIcons as any)[habit.icon] || LucideIcons.Circle;
-                  const todayCompletion = completions.find(c => c.habitId === habit.id && c.date === todayStr);
+                  const todayCompletion = completions.find(c => c.habit_id === habit.id && c.date === todayStr);
                   const streak = getCurrentStreak(habit.id);
 
                   return (
@@ -109,22 +109,22 @@ export function DailyView() {
                           </div>
                           <div className="flex-1">
                             <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-black uppercase">{habit.name}</h4>
+                              <h4 className="font-bold text-[var(--hh-btn-text)] uppercase">{habit.name}</h4>
                               {streak > 0 && (
                                 <div className="flex items-center gap-1 bg-black bg-opacity-20 px-2 py-0.5 rounded-full">
                                   <Flame className="w-3 h-3 text-orange-600" />
-                                  <span className="text-xs font-bold text-black">{streak}</span>
+                                  <span className="text-xs font-bold text-[var(--hh-btn-text)]">{streak}</span>
                                 </div>
                               )}
                             </div>
                             {habit.time && (
-                              <div className="flex items-center gap-1 text-black text-sm mt-1 opacity-75">
+                              <div className="flex items-center gap-1 text-[var(--hh-btn-text)] text-sm mt-1 opacity-75">
                                 <Clock className="w-4 h-4" />
                                 <span>{habit.time}</span>
                               </div>
                             )}
                             {habit.description && (
-                              <p className="text-sm text-black mt-1 opacity-75">{habit.description}</p>
+                              <p className="text-sm text-[var(--hh-btn-text)] mt-1 opacity-75">{habit.description}</p>
                             )}
                           </div>
                         </div>

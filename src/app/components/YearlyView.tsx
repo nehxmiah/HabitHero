@@ -110,44 +110,44 @@ export function YearlyView() {
         <div className="flex items-center gap-4">
           <button
             onClick={() => setSelectedYear(selectedYear - 1)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--hh-border)] rounded-lg transition-colors"
           >
             <ChevronLeft className="w-5 h-5" />
           </button>
-          <h2 className="text-4xl font-bold text-[#4ADE80]">{selectedYear}</h2>
+          <h2 className="text-4xl font-bold text-[var(--hh-accent)]">{selectedYear}</h2>
           <button
             onClick={() => setSelectedYear(selectedYear + 1)}
-            className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
+            className="p-2 hover:bg-[var(--hh-border)] rounded-lg transition-colors"
           >
             <ChevronRight className="w-5 h-5" />
           </button>
         </div>
 
         <div className="text-right">
-          <div className="text-5xl font-bold text-[#4ADE80]">{yearSuccessRate}%</div>
-          <div className="text-sm text-gray-400">Yearly Success Rate</div>
+          <div className="text-5xl font-bold text-[var(--hh-accent)]">{yearSuccessRate}%</div>
+          <div className="text-sm text-[var(--hh-muted)]">Yearly Success Rate</div>
         </div>
       </div>
 
       {/* Yearly Stats */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="bg-[#0a0a0a] rounded-lg p-4">
-          <div className="text-xs text-gray-400">Total Completions</div>
-          <div className="text-2xl font-bold text-[#4ADE80]">{yearCompletions.length}</div>
+        <div className="bg-[var(--hh-card)] rounded-lg p-4">
+          <div className="text-xs text-[var(--hh-muted)]">Total Completions</div>
+          <div className="text-2xl font-bold text-[var(--hh-accent)]">{yearCompletions.length}</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-lg p-4">
-          <div className="text-xs text-gray-400">Total Possible</div>
+        <div className="bg-[var(--hh-card)] rounded-lg p-4">
+          <div className="text-xs text-[var(--hh-muted)]">Total Possible</div>
           <div className="text-2xl font-bold">{totalPossible}</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-lg p-4">
-          <div className="text-xs text-gray-400">Best Month</div>
-          <div className="text-lg font-bold text-[#4ADE80]">{bestMonth.month}</div>
-          <div className="text-xs text-gray-400">{bestMonth.rate}%</div>
+        <div className="bg-[var(--hh-card)] rounded-lg p-4">
+          <div className="text-xs text-[var(--hh-muted)]">Best Month</div>
+          <div className="text-lg font-bold text-[var(--hh-accent)]">{bestMonth.month}</div>
+          <div className="text-xs text-[var(--hh-muted)]">{bestMonth.rate}%</div>
         </div>
-        <div className="bg-[#0a0a0a] rounded-lg p-4">
-          <div className="text-xs text-gray-400">Worst Month</div>
+        <div className="bg-[var(--hh-card)] rounded-lg p-4">
+          <div className="text-xs text-[var(--hh-muted)]">Worst Month</div>
           <div className="text-lg font-bold text-red-400">{worstMonth.month}</div>
-          <div className="text-xs text-gray-400">{worstMonth.rate}%</div>
+          <div className="text-xs text-[var(--hh-muted)]">{worstMonth.rate}%</div>
         </div>
       </div>
 
@@ -157,11 +157,11 @@ export function YearlyView() {
           const monthDays = getMonthData(selectedYear, monthIdx);
           
           return (
-            <div key={month} className="bg-[#0a0a0a] rounded-lg p-4">
+            <div key={month} className="bg-[var(--hh-card)] rounded-lg p-4">
               <h3 className="font-bold mb-3 text-center">{month}</h3>
               <div className="grid grid-cols-7 gap-1">
                 {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((day, idx) => (
-                  <div key={idx} className="text-xs text-center text-gray-500 font-medium h-6 flex items-center justify-center">
+                  <div key={idx} className="text-xs text-center text-[var(--hh-muted)] font-medium h-6 flex items-center justify-center">
                     {day}
                   </div>
                 ))}
@@ -175,7 +175,7 @@ export function YearlyView() {
                       key={idx}
                       className={`aspect-square rounded flex items-center justify-center text-xs ${
                         day.isCurrentMonth ? 'font-medium' : 'text-gray-600'
-                      } ${isToday ? 'ring-2 ring-[#4ADE80]' : ''}`}
+                      } ${isToday ? 'ring-2 ring-[var(--hh-accent)]' : ''}`}
                       style={{
                         backgroundColor: color,
                         opacity: day.isCurrentMonth ? 1 : 0.3,
@@ -194,7 +194,7 @@ export function YearlyView() {
 
       {/* Legend */}
       <div className="flex items-center justify-center gap-4">
-        <span className="text-sm text-gray-400">Less</span>
+        <span className="text-sm text-[var(--hh-muted)]">Less</span>
         {[0, 1, 2, 3, 4].map((intensity) => (
           <div
             key={intensity}
@@ -202,7 +202,7 @@ export function YearlyView() {
             style={{ backgroundColor: getColorForIntensity(intensity) }}
           />
         ))}
-        <span className="text-sm text-gray-400">More</span>
+        <span className="text-sm text-[var(--hh-muted)]">More</span>
       </div>
     </div>
   );
